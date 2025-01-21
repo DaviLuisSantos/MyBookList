@@ -19,9 +19,9 @@ namespace MyBookList.Models
             [Required]
             public string PasswordHash { get; set; }
 
-            public int LibraryId { get; set; }
+            //public int LibraryId { get; set; }
 
-            [ForeignKey("LibraryId")]
-            public Library Library { get; set; }
+            //[ForeignKey("LibraryId")]
+            //public Library Library { get; set; }
         }
     }

@@ -64,23 +64,44 @@ builder.Services.AddCors(options =>
 });
 
 // No Program.cs
-var key = Encoding.ASCII.GetBytes("cigiloooooooooooooooooooooooooooooooooooooooooo");
-builder.Services.AddSingleton<ITokenService>(new TokenService(key));
-builder.Services.AddAuthentication(options =>
+byte[]? key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:SecretKey"] ?? "askjhdgjahgsdkhsadfhgjkbhsadjkfhbjadsffgadsdsfa");
+builder.Services.AddSingleton<ITokenService>(provider => new TokenService(builder.Configuration));
+builder.Services.AddAuthentication(x =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(x =>
 {
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
+    x.RequireHttpsMetadata = false;
+    x.SaveToken = true;
+    x.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = false,
-        ValidateAudience = false,
-        ClockSkew = TimeSpan.Zero
+        ValidateAudience = false
+    };
+    x.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Headers["Authorization"].ToString().Replace("Bearer ","");
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine("Falha na autenticação: " + context.Exception);
+            if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
+            {
+                context.Response.Headers.Add("Token-Expired", "true");
+            }
+            return Task.CompletedTask;
+        }
     };
 });
 
@@ -105,7 +126,8 @@ app.UseCors("AllowAllOrigins");
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication(); // Add this line
+app.UseAuthentication(); 
+
 app.UseAuthorization();
 
 app.MapControllers();

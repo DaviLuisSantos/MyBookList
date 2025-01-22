@@ -100,7 +100,7 @@ namespace MyBookList.Controllers
             */
 
             // 2. Generate the JWT token
-            string? token = _tokenService.GenerateToken(user);
+            string? token = _tokenService.GenerateToken(user.Username);
 
             // 3. Return the token to the client
             return Ok(new { Token = token });

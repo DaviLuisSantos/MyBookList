@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyBookList.Models;
 using MyBookList.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace MyBookList.Controllers
 {
@@ -10,9 +11,9 @@ namespace MyBookList.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        private readonly BookService _bookService;
+        private readonly IBookService _bookService;
         private readonly ITokenService _tokenService;
-        public BookController(BookService bookService, ITokenService tokenService)
+        public BookController(IBookService bookService, ITokenService tokenService)
         {
             _bookService = bookService;
             _tokenService = tokenService;
@@ -35,9 +36,17 @@ namespace MyBookList.Controllers
         }
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> CreateBook(Book book)
+        public async Task<IActionResult> CreateBook(BookCreateDto book)
         {
-            var createdBook = await _bookService.CreateBook(book);
+            Book newBook = new Book
+            {
+                Title = book.Title,
+                Author = book.Author,
+                Description = book.Description,
+                Pages = book.Pages,
+                Genre = book.Genre
+            };
+            var createdBook = await _bookService.CreateBook(newBook);
             return CreatedAtAction(nameof(GetBookById), new { id = createdBook.BookId }, createdBook);
         }
         [HttpPut("{id}")]
@@ -57,6 +66,18 @@ namespace MyBookList.Controllers
             if (!result)
                 return NotFound();
             return NoContent();
+        }
+
+        public class BookCreateDto
+        {
+            [Required]
+            public string Title { get; set; }
+            [Required]
+            public string Author { get; set; }
+
+            public string? Description { get; set; }
+            public int? Pages { get; set; }
+            public string? Genre { get; set; }
         }
 
     }

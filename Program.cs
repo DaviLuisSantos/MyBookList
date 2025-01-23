@@ -50,6 +50,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IUserBookService,UserBookService>();
 //builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddCors(options =>

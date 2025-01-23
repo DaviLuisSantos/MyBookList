@@ -65,6 +65,11 @@ namespace MyBookList.Services
             return user;
         }
 
+        public async Task<User> GetUserByUuid(System.Guid uuid)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.UserUuid == uuid);
+        }
+
         private bool VerifyPasswordHash(string password, string storedHash)
         {
             // Implement your password hash verification logic here

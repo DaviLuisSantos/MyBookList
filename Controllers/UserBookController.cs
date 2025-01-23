@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using MyBookList.Services;
 using MyBookList.Models;
 using System.ComponentModel.DataAnnotations;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace MyBookList.Controllers
 {
@@ -47,9 +49,33 @@ namespace MyBookList.Controllers
         }
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> CreateUserBook(UserBook userBook)
+        public async Task<IActionResult> CreateUserBook(UserBookCreateDto userBook)
         {
-            var createdUserBook = await _userBookService.CreateUserBook(userBook);
+            // Extract the UserUuid from the JWT token
+            var userUuidClaim = User.FindFirst("UserUuid");
+            if (userUuidClaim == null)
+            {
+                return Unauthorized();
+            }
+
+            Guid userUuid = Guid.Parse(userUuidClaim.Value);
+
+            // Convert startDate from string to DateTime
+            DateTime? startDate = null;
+            if (!string.IsNullOrEmpty(userBook.startDate))
+            {
+                startDate = DateTime.ParseExact(userBook.startDate, "yyyy-MM-dd", null);
+            }
+
+            UserBook newuserBook = new UserBook
+            {
+                BookId = userBook.BookId,
+                Status = userBook.Status,
+                DateStarted = startDate,
+                DateFinished = userBook.DateFinished
+            };
+
+            var createdUserBook = await _userBookService.CreateUserBook(newuserBook, userUuid);
             return CreatedAtAction(nameof(GetUserBookById), new { id = createdUserBook.UserBookId }, createdUserBook);
         }
         [HttpPut]
@@ -80,10 +106,8 @@ namespace MyBookList.Controllers
             [Required]
             public int BookId { get; set; }
             [Required]
-            public int Rating { get; set; }
-            [Required]
             public string? Status { get; set; }
-            public DateTime? DateStarted { get; set; }
+            public string? startDate { get; set; }
             public DateTime? DateFinished { get; set; }
         }
     }

@@ -27,7 +27,7 @@ namespace MyBookList.Services
             var key = Encoding.ASCII.GetBytes(_config["Jwt:SecretKey"] ?? "askjhdgjahgsdkhsadfhgjkbhsadjkfhbjadsffgadsdsfa");
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] { new Claim("username", username) }),
+                Subject = new ClaimsIdentity(new[] { new Claim("UserUuid", username) }),
                 Expires = DateTime.UtcNow.AddHours(1), // Tempo de expiração do token
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };

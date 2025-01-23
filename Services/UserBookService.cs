@@ -1,6 +1,7 @@
 ﻿using MyBookList.Models;
 using MyBookList.Data;
 using Microsoft.EntityFrameworkCore;
+using MyBookList.Services;
 
 namespace MyBookList.Services
 {
@@ -23,8 +24,16 @@ namespace MyBookList.Services
         {
             return await _context.UserBooks.ToListAsync();
         }
-        public async Task<UserBook> CreateUserBook(UserBook userBook)
+        public async Task<UserBook> CreateUserBook(UserBook userBook,Guid uuid)
         {
+            UserService userService = new UserService(_context);
+            BookService bookService = new BookService(_context);
+            var user = await userService.GetUserByUuid(uuid);
+            var book = await bookService.GetBookById(userBook.BookId);
+
+            userBook.UserId = user.UserId;
+            userBook.BookId = book.BookId;
+
             _context.UserBooks.Add(userBook);
             await _context.SaveChangesAsync();
             return userBook;

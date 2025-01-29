@@ -11,6 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyBookList API", Version = "v1" });
+});
 
 builder.AddAuth();
 
@@ -22,7 +26,6 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IUserBookService, UserBookService>();
 //builder.Services.AddScoped<ITokenService, TokenService>();
-
 
 builder.Services.AddCors(options =>
 {
@@ -44,12 +47,15 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.EnsureCreated();
 }
 
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    }
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyBookList API v1");
+    });
+}
 
 // Habilita o CORS **ANTES** de qualquer outro middleware que possa precisar dele
 app.UseCors("AllowAllOrigins");
@@ -64,6 +70,5 @@ app.UseAuthorization();
 
 // Map dos Controllers
 app.MapControllers();
-
 
 app.Run();

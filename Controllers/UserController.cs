@@ -4,6 +4,7 @@ using MyBookList.Services;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
+using MyBookList.Authentication;
 
 namespace MyBookList.Controllers
 {
@@ -12,12 +13,10 @@ namespace MyBookList.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly ITokenService _tokenService;
 
-        public UserController(IUserService userService, ITokenService tokenService)
+        public UserController(IUserService userService)
         {
             _userService = userService;
-            _tokenService = tokenService;
         }
 
         [HttpGet("{id}")]
@@ -100,7 +99,7 @@ namespace MyBookList.Controllers
             */
 
             // 2. Generate the JWT token
-            string? token = _tokenService.GenerateToken(user.UserUuid.ToString());
+            string? token = AuthService.GenerateToken(user);
 
             // 3. Return the token to the client
             return Ok(new { Token = token });

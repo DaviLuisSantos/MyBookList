@@ -61,7 +61,8 @@ namespace MyBookList.Services
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null)
                 return null;
-
+            if(!VerifyPasswordHash(password, user.PasswordHash))
+                return null;
             return user;
         }
 

@@ -45,7 +45,7 @@ namespace MyBookList.Controllers
             {
                 Username = userDto.Username,
                 Email = userDto.Email,
-                PasswordHash = userDto.Password
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password)
             };
 
             var createdUser = await _userService.CreateUser(user);

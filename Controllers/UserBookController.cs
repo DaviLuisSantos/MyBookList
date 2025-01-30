@@ -13,12 +13,10 @@ namespace MyBookList.Controllers
     public class UserBookController : ControllerBase
     {
         private readonly IUserBookService _userBookService;
-        private readonly ITokenService _tokenService;
 
-        public UserBookController(IUserBookService userBookService, ITokenService tokenService)
+        public UserBookController(IUserBookService userBookService)
         {
             _userBookService = userBookService;
-            _tokenService = tokenService;
         }
 
         [HttpGet]

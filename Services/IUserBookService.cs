@@ -1,14 +1,15 @@
-﻿using MyBookList.Models;   
+﻿using MyBookList.Models;
+using MyBookList.DTOs.UserBook;
 
 namespace MyBookList.Services
 {
-    public interface IUserBookService
+    public interface IUserBookService : ICrudService<UserBook, UserBookCreateDto>
     {
-        Task<UserBook> GetUserBookById(int userBookId);
-        Task<IEnumerable<UserBook>> GetAllUserBooks();
-        Task<IEnumerable<UserBook>> GetUserBooksByUserId(int userId);
-        Task<UserBook> CreateUserBook(UserBook userBook,Guid uuid);
-        Task<UserBook> UpdateUserBook(UserBook userBook);
-        Task<bool> DeleteUserBook(int userBookId);
+        Task<UserBook> GetById(int userBookId);
+        Task<List<UserBook>> GetAll();
+        Task<List<UserBook>> GetByUserId(int userId);
+        Task<UserBook> Create(UserBookCreateDto userBook);
+        Task<UserBook> Update(UserBook userBook);
+        Task<bool> Delete(int userBookId);
     }
 }

@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyBookList.Data;
 using MyBookList.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using MyBookList.DTOs.Book;
 
 namespace MyBookList.Services
 {
@@ -13,27 +12,36 @@ namespace MyBookList.Services
         {
             _context = context;
         }
-        public async Task<Book> GetBookById(int bookId)
+        public async Task<Book> GetById(int bookId)
         {
             return await _context.Books.FindAsync(bookId);
         }
-        public async Task<IEnumerable<Book>> GetAllBooks()
+        public async Task<List<Book>> GetAll()
         {
             return await _context.Books.ToListAsync();
         }
-        public async Task<Book> CreateBook(Book book)
+        public async Task<Book> Create(BookCreateDto bookDto)
         {
+            var book = new Book
+            {
+                Title = bookDto.Title,
+                Author = bookDto.Author,
+                Description = bookDto.Description,
+                Pages = bookDto.Pages,
+                Genre = bookDto.Genre
+            };
+
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
             return book;
         }
-        public async Task<Book> UpdateBook(Book book)
+        public async Task<Book> Update(Book book)
         {
             _context.Entry(book).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return book;
         }
-        public async Task<bool> DeleteBook(int bookId)
+        public async Task<bool> Delete(int bookId)
         {
             var book = await _context.Books.FindAsync(bookId);
             if (book == null)

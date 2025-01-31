@@ -1,8 +1,7 @@
 ﻿using MyBookList.Models;
 using MyBookList.Services;
-using System.ComponentModel.DataAnnotations;
 using Carter;
-using MyBookList.Data;
+using MyBookList.DTOs.UserBook;
 
 
 namespace MyBookList.Controllers;
@@ -13,7 +12,7 @@ public override void AddRoutes(IEndpointRouteBuilder app)
     {
         app.MapPost("/api/userBook/getAll", async (int id, IUserBookService service) =>
         {
-            var book = await service.GetUserBooksByUserId(id);
+            var book = await service.GetByUserId(id);
             if (book == null)
                 return Results.NotFound();
             return Results.Ok(book);
@@ -29,48 +28,23 @@ public override void AddRoutes(IEndpointRouteBuilder app)
             }
             Guid userUuid = Guid.Parse(token);
 
-            DateTime startDate;
-
-            startDate = DateTime.ParseExact(userBook.StartDate, "yyyy-MM-dd", null);
-            DateTime endDate = DateTime.ParseExact(userBook.FinishDate, "yyyy-MM-dd", null);
-
-            UserBook newUserBook = new UserBook
-            {
-                BookId = userBook.BookId,
-                Status = userBook.Status,
-                DateStarted = startDate,
-                DateFinished = endDate
-
-            };
-
-            var createdUserBook = await service.CreateUserBook(newUserBook, userUuid);
+            var createdUserBook = await service.Create(userBook);
             return Results.Ok(createdUserBook);
         });
 
         app.MapPut("/api/userBook/update", async (UserBook userBook, IUserBookService service) =>
         {
-            var updatedUserBook = await service.UpdateUserBook(userBook);
+            var updatedUserBook = await service.Update(userBook);
             return Results.Ok(updatedUserBook);
         });
         app.MapDelete("/api/userBook/delete/{id:int}", async (IUserBookService service, int id) =>
         {
-            var result = await service.DeleteUserBook(id);
+            var result = await service.Delete(id);
             if (!result)
                 return Results.NotFound();
             return Results.NoContent();
         });
 
-    }
-    public class UserBookCreateDto
-    {
-        [Required]
-        public int UserId { get; set; }
-        [Required]
-        public int BookId { get; set; }
-        [Required]
-        public string? Status { get; set; }
-        public string? StartDate { get; set; }
-        public string? FinishDate { get; set; }
-    }
+    }    
 
 }

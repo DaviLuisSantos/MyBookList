@@ -1,82 +1,53 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using MyBookList.Models;
+﻿using MyBookList.Models;
 using MyBookList.Services;
-using System.ComponentModel.DataAnnotations;
+using Carter;
+using MyBookList.DTOs.Book;
 
-namespace MyBookList.Controllers
+
+namespace MyBookList.Controllers;
+
+public class BookController : CarterModule
 {
-    [Route("[controller]")]
-    [ApiController]
-    public class BookController : ControllerBase
+    private readonly IBookService _bookService;
+
+    public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        private readonly IBookService _bookService;
-        public BookController(IBookService bookService)
+        app.MapPost("/api/userBook/getAll", async (int id, IBookService service) =>
         {
-            _bookService = bookService;
-        }
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetAllBooks()
-        {
-            var books = await _bookService.GetAllBooks();
-            return Ok(books);
-        }
-        [HttpGet("{id}")]
-        [Authorize]
-        public async Task<IActionResult> GetBookById(int id)
-        {
-            var book = await _bookService.GetBookById(id);
+            var book = await _bookService.GetAll();
             if (book == null)
-                return NotFound();
-            return Ok(book);
-        }
-        [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> CreateBook(BookCreateDto book)
+                return Results.NotFound();
+            return Results.Ok(book);
+
+        });
+
+        app.MapPost("/api/userBook/getById", async (int id, IBookService service) =>
         {
-            Book newBook = new Book
-            {
-                Title = book.Title,
-                Author = book.Author,
-                Description = book.Description,
-                Pages = book.Pages,
-                Genre = book.Genre
-            };
-            var createdBook = await _bookService.CreateBook(newBook);
-            return CreatedAtAction(nameof(GetBookById), new { id = createdBook.BookId }, createdBook);
-        }
-        [HttpPut("{id}")]
-        [Authorize]
-        public async Task<IActionResult> UpdateBook(int id, Book book)
+            var book = await _bookService.GetById(id);
+            if (book == null)
+                return Results.NotFound();
+            return Results.Ok(book);
+        });
+
+        app.MapPost("/api/userBook/create", async (BookCreateDto book, IBookService service) =>
         {
-            if (id != book.BookId)
-                return BadRequest();
-            var updatedBook = await _bookService.UpdateBook(book);
-            return Ok(updatedBook);
-        }
-        [HttpDelete("{id}")]
-        [Authorize]
-        public async Task<IActionResult> DeleteBook(int id)
+            var createdBook = await _bookService.Create(book);
+            return Results.Ok(createdBook);
+        });
+
+        app.MapPut("/api/userBook/update", async (Book book, IBookService service) =>
         {
-            var result = await _bookService.DeleteBook(id);
+            var updatedBook = await _bookService.Update(book);
+            return Results.Ok(updatedBook);
+        });
+
+        app.MapDelete("/api/userBook/delete/{id:int}", async (IBookService service, int id) =>
+        {
+            var result = await _bookService.Delete(id);
             if (!result)
-                return NotFound();
-            return NoContent();
-        }
-
-        public class BookCreateDto
-        {
-            [Required]
-            public string Title { get; set; }
-            [Required]
-            public string Author { get; set; }
-
-            public string? Description { get; set; }
-            public int? Pages { get; set; }
-            public string? Genre { get; set; }
-        }
-
+                return Results.NotFound();
+            return Results.NoContent();
+        });
     }
+  
 }

@@ -1,8 +1,8 @@
 ﻿using MyBookList.Models;
 using MyBookList.Services;
-using System.ComponentModel.DataAnnotations;
 using Carter;
-using MyBookList.Data;
+using MyBookList.DTOs.User;
+
 
 
 namespace MyBookList.Controllers;
@@ -15,7 +15,7 @@ public class UserController : CarterModule
     {
         app.MapPost("/api/user/getById", async (int id) =>
         {
-            var user = await _userService.GetUserById(id);
+            var user = await _userService.GetById(id);
             if (user == null)
                 return Results.NotFound();
             return Results.Ok(user);
@@ -30,8 +30,8 @@ public class UserController : CarterModule
 
         app.MapPost("/api/user/register", async (UserCreateDto userDto, IUserService service) =>
         {
-            bool createdUser = await service.CreateUser(userDto.Username,userDto.Password,userDto.Email);
-            if (!createdUser)
+            var createdUser = await service.Create(userDto);
+            if (createdUser==null)
                 return Results.BadRequest();
             else
                 return Results.Ok();
@@ -43,7 +43,7 @@ public class UserController : CarterModule
             {
                 return Results.BadRequest();
             }
-            var updatedUser = await _userService.UpdateUser(user);
+            var updatedUser = await _userService.Update(user);
             if (updatedUser == null)
                 return Results.NotFound();
             return Results.Ok(updatedUser);
@@ -51,16 +51,16 @@ public class UserController : CarterModule
 
         app.MapPost("/api/user/delete", async (int id) =>
         {
-            var result = await _userService.DeleteUser(id);
+            var result = await _userService.Delete(id);
             if (!result)
                 return Results.NotFound();
             return Results.NoContent();
         });
 
-        app.MapPost("/api/user/login", async (LoginRequest loginRequest, IUserService service) =>
+        app.MapPost("/api/user/login", async (LoginDto loginRequest, IUserService service) =>
         {
 
-            string? token = await service.Login(loginRequest.Username, loginRequest.Password);
+            string? token = await service.Login(loginRequest);
             if (token == null)
             {
                 return Results.NotFound();
@@ -81,15 +81,4 @@ public class UserController : CarterModule
         public string Password { get; set; }
     }
 
-    public class UserCreateDto
-    {
-        [Required]
-        [MaxLength(100)]
-        public string Username { get; set; }
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-        [Required]
-        public string Password { get; set; }
-    }
 }

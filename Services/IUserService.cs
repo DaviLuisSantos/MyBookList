@@ -1,17 +1,16 @@
 ﻿using MyBookList.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using MyBookList.DTOs.User;
 
 namespace MyBookList.Services
 {
-    public interface IUserService
+    public interface IUserService: ICrudService<User, UserCreateDto>
     {
-        Task<User> GetUserById(int userId);
-        Task<User> GetUserByUsername(string username);
+        Task<User> GetById(int userId);
+        Task<User> GetByUsername(string username);
         Task<List<User>> GetAll();
-        Task<bool> CreateUser(string username,string password, string email);
-        Task<User> UpdateUser(User user);
-        Task<bool> DeleteUser(int userId);
-        Task<string> Login(string username, string password);
+        Task<User> Create(UserCreateDto userNv);
+        Task<User> Update(User user);
+        Task<bool> Delete(int userId);
+        Task<string> Login(LoginDto login);
     }
 }

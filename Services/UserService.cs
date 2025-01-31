@@ -2,6 +2,7 @@
 using MyBookList.Data;
 using MyBookList.Models;
 using MyBookList.Authentication;
+using MyBookList.DTOs.User;
 
 namespace MyBookList.Services
 {
@@ -14,12 +15,12 @@ namespace MyBookList.Services
             _context = context;
         }
 
-        public async Task<User> GetUserById(int userId)
+        public async Task<User> GetById(int userId)
         {
             return await _context.Users.FindAsync(userId);
         }
 
-        public async Task<User> GetUserByUsername(string username)
+        public async Task<User> GetByUsername(string username)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
@@ -29,27 +30,27 @@ namespace MyBookList.Services
             return await _context.Users.ToListAsync();
         }
 
-        public async Task<bool> CreateUser(string username,string password,string email)
+        public async Task<User> Create(UserCreateDto userNv)
         {
             User user = new User
             {
-                Username = username,
-                Email = email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password)
+                Username = userNv.Username,
+                Email = userNv.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(userNv.Password)
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            return true;
+            return user;
         }
 
-        public async Task<User> UpdateUser(User user)
+        public async Task<User> Update(User user)
         {
             _context.Entry(user).State = EntityState.Modified;
             await _context.SaveChangesAsync();
             return user;
         }
 
-        public async Task<bool> DeleteUser(int userId)
+        public async Task<bool> Delete(int userId)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
@@ -60,13 +61,13 @@ namespace MyBookList.Services
             return true;
         }
 
-        public async Task<string> Login(string username, string password)
+        public async Task<string> Login(LoginDto login)
         {
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == login.Username);
             if (user == null)
                 return null;
-            if(!VerifyPasswordHash(password, user.PasswordHash))
+            if(!VerifyPasswordHash(login.Password, user.PasswordHash))
                 return "0";
 
             return AuthService.GenerateToken(user);

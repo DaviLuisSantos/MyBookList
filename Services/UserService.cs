@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyBookList.Data;
 using MyBookList.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using MyBookList.Authentication;
 
 namespace MyBookList.Services
 {
@@ -26,16 +24,22 @@ namespace MyBookList.Services
             return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
 
-        public async Task<IEnumerable<User>> GetAllUsers()
+        public async Task<List<User>> GetAll()
         {
             return await _context.Users.ToListAsync();
         }
 
-        public async Task<User> CreateUser(User user)
+        public async Task<bool> CreateUser(string username,string password,string email)
         {
+            User user = new User
+            {
+                Username = username,
+                Email = email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password)
+            };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            return user;
+            return true;
         }
 
         public async Task<User> UpdateUser(User user)
@@ -56,13 +60,17 @@ namespace MyBookList.Services
             return true;
         }
 
-        public async Task<User> Login(string username, string password)
+        public async Task<string> Login(string username, string password)
         {
+
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null)
                 return null;
+            if(!VerifyPasswordHash(password, user.PasswordHash))
+                return "0";
 
-            return user;
+            return AuthService.GenerateToken(user);
+
         }
 
         public async Task<User> GetUserByUuid(System.Guid uuid)

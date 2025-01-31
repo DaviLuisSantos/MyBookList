@@ -8,10 +8,10 @@ namespace MyBookList.Services
     {
         Task<User> GetUserById(int userId);
         Task<User> GetUserByUsername(string username);
-        Task<IEnumerable<User>> GetAllUsers();
-        Task<User> CreateUser(User user);
+        Task<List<User>> GetAll();
+        Task<bool> CreateUser(string username,string password, string email);
         Task<User> UpdateUser(User user);
         Task<bool> DeleteUser(int userId);
-        Task<User> Login(string username, string password);
+        Task<string> Login(string username, string password);
     }
 }

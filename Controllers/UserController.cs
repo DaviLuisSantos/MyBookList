@@ -1,134 +1,95 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MyBookList.Models;
+﻿using MyBookList.Models;
 using MyBookList.Services;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
+using Carter;
+using MyBookList.Data;
 
-namespace MyBookList.Controllers
+
+namespace MyBookList.Controllers;
+
+public class UserController : CarterModule
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class UserController : ControllerBase
+    private readonly IUserService _userService;
+
+    public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        private readonly IUserService _userService;
-        private readonly ITokenService _tokenService;
-
-        public UserController(IUserService userService, ITokenService tokenService)
-        {
-            _userService = userService;
-            _tokenService = tokenService;
-        }
-
-        [HttpGet("{id}")]
-        [Authorize]
-        public async Task<IActionResult> GetUser(int id)
+        app.MapPost("/api/user/getById", async (int id) =>
         {
             var user = await _userService.GetUserById(id);
             if (user == null)
-                return NotFound();
-            return Ok(user);
-        }
+                return Results.NotFound();
+            return Results.Ok(user);
 
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetAllUsers()
+        });
+
+        app.MapPost("/api/user/getAll", async (IUserService service) =>
         {
-            var users = await _userService.GetAllUsers();
-            return Ok(users);
-        }
+            List<User>? users = await service.GetAll();
+            return users == null ? Results.Ok() : Results.Ok(users);
+        });
 
-        [HttpPost("register")]
-        [AllowAnonymous]
-        public async Task<IActionResult> CreateUser(UserCreateDto userDto)
+        app.MapPost("/api/user/register", async (UserCreateDto userDto, IUserService service) =>
         {
-            var user = new User
-            {
-                Username = userDto.Username,
-                Email = userDto.Email,
-                PasswordHash = userDto.Password
-            };
+            bool createdUser = await service.CreateUser(userDto.Username,userDto.Password,userDto.Email);
+            if (!createdUser)
+                return Results.BadRequest();
+            else
+                return Results.Ok();
+        });
 
-            var createdUser = await _userService.CreateUser(user);
-            return CreatedAtAction(nameof(GetUser), new { id = createdUser.UserId }, createdUser);
-        }
-
-        [HttpPut("{id}")]
-        [Authorize]
-        public async Task<IActionResult> UpdateUser(int id, User user)
+        app.MapPost("/api/user/update", async (int id, User user) =>
         {
             if (id != user.UserId)
             {
-                return BadRequest();
+                return Results.BadRequest();
             }
-
             var updatedUser = await _userService.UpdateUser(user);
             if (updatedUser == null)
-                return NotFound();
+                return Results.NotFound();
+            return Results.Ok(updatedUser);
+        });
 
-            return Ok(updatedUser);
-        }
-
-        [HttpDelete("{id}")]
-        [Authorize]
-        public async Task<IActionResult> DeleteUser(int id)
+        app.MapPost("/api/user/delete", async (int id) =>
         {
             var result = await _userService.DeleteUser(id);
             if (!result)
-                return NotFound();
+                return Results.NotFound();
+            return Results.NoContent();
+        });
 
-            return NoContent();
-        }
-
-        [HttpPost("login")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+        app.MapPost("/api/user/login", async (LoginRequest loginRequest, IUserService service) =>
         {
-            // 1. Validate the user and password (can use UserService)
-            User? user = await _userService.GetUserByUsername(loginRequest.Username);
-            if (user == null)
+
+            string? token = await service.Login(loginRequest.Username, loginRequest.Password);
+            if (token == null)
             {
-                return NotFound();
+                return Results.NotFound();
+            }
+            else if (token == "0")
+            {
+                return Results.Unauthorized();
             }
 
-            /*
-            // Verify the password (use an appropriate hash comparison function)
-            if (!VerifyPassword(loginRequest.Password, user.PasswordHash))
-            {
-                return Unauthorized();
-            }
-            */
+            return Results.Ok(new { Token = token });
 
-            // 2. Generate the JWT token
-            string? token = _tokenService.GenerateToken(user.UserUuid.ToString());
+        });
+    }
 
-            // 3. Return the token to the client
-            return Ok(new { Token = token });
-        }
+    public class LoginRequest
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
 
-        private bool VerifyPassword(string password, string storedHash)
-        {
-            // Implement your password verification logic here
-            // For example, using BCrypt:
-            return BCrypt.Net.BCrypt.Verify(password, storedHash);
-        }
-
-        public class LoginRequest
-        {
-            public string Username { get; set; }
-            public string Password { get; set; }
-        }
-
-        public class UserCreateDto
-        {
-            [Required]
-            [MaxLength(100)]
-            public string Username { get; set; }
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; }
-            [Required]
-            public string Password { get; set; }
-        }
+    public class UserCreateDto
+    {
+        [Required]
+        [MaxLength(100)]
+        public string Username { get; set; }
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+        [Required]
+        public string Password { get; set; }
     }
 }

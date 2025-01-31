@@ -1,83 +1,54 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using MyBookList.Models;
 using MyBookList.Services;
-using MyBookList.Models;
 using System.ComponentModel.DataAnnotations;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using Carter;
+using MyBookList.Data;
 
-namespace MyBookList.Controllers
+
+namespace MyBookList.Controllers;
+
+public class UserBookController : CarterModule
 {
-    [Route("[controller]")]
-    [ApiController]
-    public class UserBookController : ControllerBase
+public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        private readonly IUserBookService _userBookService;
-        private readonly ITokenService _tokenService;
+        app.MapPost("/api/userBook/getAll", async (int id, IUserBookService service) =>
+        {
+            var book = await service.GetUserBooksByUserId(id);
+            if (book == null)
+                return Results.NotFound();
+            return Results.Ok(book);
 
-        public UserBookController(IUserBookService userBookService, ITokenService tokenService)
+        });
+        app.MapPost("/api/userBook/create", async (UserBookCreateDto userBook, IUserBookService service, HttpContext httpContext) =>
         {
-            _userBookService = userBookService;
-            _tokenService = tokenService;
-        }
+            var token = httpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> GetAllUserBooks()
-        {
-            var userBooks = await _userBookService.GetAllUserBooks();
-            return Ok(userBooks);
-        }
-
-        [HttpGet]
-        [Route("{id}")]
-        [Authorize]
-        public async Task<IActionResult> GetUserBookById(int id)
-        {
-            var userBook = await _userBookService.GetUserBookById(id);
-            if (userBook == null)
-                return NotFound();
-            return Ok(userBook);
-        }
-        [HttpGet]
-        [Route("user/{userId}")]
-        [Authorize]
-        public async Task<IActionResult> GetUserBooksByUserId(int userId)
-        {
-            var userBooks = await _userBookService.GetUserBooksByUserId(userId);
-            return Ok(userBooks);
-        }
-        [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> CreateUserBook(UserBookCreateDto userBook)
-        {
-            // Extract the UserUuid from the JWT token
-            var userUuidClaim = User.FindFirst("UserUuid");
-            if (userUuidClaim == null)
+            if (string.IsNullOrEmpty(token))
             {
-                return Unauthorized();
+                return Results.Unauthorized();
             }
+            Guid userUuid = Guid.Parse(token);
 
-            Guid userUuid = Guid.Parse(userUuidClaim.Value);
+            DateTime startDate;
 
-            // Convert startDate from string to DateTime
-            DateTime? startDate = null;
-            if (!string.IsNullOrEmpty(userBook.startDate))
-            {
-                startDate = DateTime.ParseExact(userBook.startDate, "yyyy-MM-dd", null);
-            }
+            startDate = DateTime.ParseExact(userBook.StartDate, "yyyy-MM-dd", null);
+            DateTime endDate = DateTime.ParseExact(userBook.FinishDate, "yyyy-MM-dd", null);
 
-            UserBook newuserBook = new UserBook
+            UserBook newUserBook = new UserBook
             {
                 BookId = userBook.BookId,
                 Status = userBook.Status,
                 DateStarted = startDate,
-                DateFinished = userBook.DateFinished
+                DateFinished = endDate
+
             };
 
-            var createdUserBook = await _userBookService.CreateUserBook(newuserBook, userUuid);
-            return CreatedAtAction(nameof(GetUserBookById), new { id = createdUserBook.UserBookId }, createdUserBook);
-        }
+            var createdUserBook = await service.CreateUserBook(newUserBook, userUuid);
+            return Results.Ok(createdUserBook);
+        });
+
+    }    
+}
         [HttpPut]
         [Route("{id}")]
         [Authorize]
@@ -107,8 +78,8 @@ namespace MyBookList.Controllers
             public int BookId { get; set; }
             [Required]
             public string? Status { get; set; }
-            public string? startDate { get; set; }
-            public DateTime? DateFinished { get; set; }
+            public string? StartDate { get; set; }
+            public string? FinishDate { get; set; }
         }
     }
 }

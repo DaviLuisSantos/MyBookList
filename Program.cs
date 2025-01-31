@@ -1,31 +1,24 @@
+using Carter;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using MyBookList.Authentication;
 using MyBookList.Data;
 using MyBookList.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "MyBookList API", Version = "v1" });
-});
 
+builder.Services.AddOpenApi();
 builder.AddAuth();
-
 // Adicione o contexto do banco de dados
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=wallet.db"));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=database.db"));
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IUserBookService, UserBookService>();
 //builder.Services.AddScoped<ITokenService, TokenService>();
+
+builder.Services.AddCarter();
 
 builder.Services.AddCors(options =>
 {
@@ -50,25 +43,17 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "MyBookList API v1");
-    });
+    app.MapOpenApi();
 }
 
-// Habilita o CORS **ANTES** de qualquer outro middleware que possa precisar dele
 app.UseCors("AllowAllOrigins");
 
 app.UseHttpsRedirection();
 
-// Middleware de Autenticação
 app.UseAuthentication();
-
-// Middleware de Autorização
 app.UseAuthorization();
 
 // Map dos Controllers
-app.MapControllers();
+app.MapCarter();
 
 app.Run();

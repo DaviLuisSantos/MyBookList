@@ -47,39 +47,30 @@ public override void AddRoutes(IEndpointRouteBuilder app)
             return Results.Ok(createdUserBook);
         });
 
-    }    
-}
-        [HttpPut]
-        [Route("{id}")]
-        [Authorize]
-        public async Task<IActionResult> UpdateUserBook(int id, UserBook userBook)
+        app.MapPut("/api/userBook/update", async (UserBook userBook, IUserBookService service) =>
         {
-            if (id != userBook.UserBookId)
-                return BadRequest();
-            var updatedUserBook = await _userBookService.UpdateUserBook(userBook);
-            return Ok(updatedUserBook);
-        }
-        [HttpDelete]
-        [Route("{id}")]
-        [Authorize]
-        public async Task<IActionResult> DeleteUserBook(int id)
+            var updatedUserBook = await service.UpdateUserBook(userBook);
+            return Results.Ok(updatedUserBook);
+        });
+        app.MapDelete("/api/userBook/delete/{id:int}", async (IUserBookService service, int id) =>
         {
-            var result = await _userBookService.DeleteUserBook(id);
+            var result = await service.DeleteUserBook(id);
             if (!result)
-                return NotFound();
-            return NoContent();
-        }
+                return Results.NotFound();
+            return Results.NoContent();
+        });
 
-        public class UserBookCreateDto
-        {
-            [Required]
-            public int UserId { get; set; }
-            [Required]
-            public int BookId { get; set; }
-            [Required]
-            public string? Status { get; set; }
-            public string? StartDate { get; set; }
-            public string? FinishDate { get; set; }
-        }
     }
+    public class UserBookCreateDto
+    {
+        [Required]
+        public int UserId { get; set; }
+        [Required]
+        public int BookId { get; set; }
+        [Required]
+        public string? Status { get; set; }
+        public string? StartDate { get; set; }
+        public string? FinishDate { get; set; }
+    }
+
 }

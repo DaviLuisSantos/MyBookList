@@ -24,7 +24,7 @@ public class UserController : CarterModule
 
         app.MapPost("/api/user/getAll", async (IUserService service) =>
         {
-            var users = await service.GetAll();
+            List<User>? users = await service.GetAll();
             return users == null ? Results.Ok() : Results.Ok(users);
         });
 

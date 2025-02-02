@@ -21,6 +21,8 @@ namespace MyBookList.Models
 
             public int? Pages { get; set; }
             public string? Genre { get; set; }
+            public string? Cover { get; set; }
+            public string Isbn {  get; set; }
         }
     
 }

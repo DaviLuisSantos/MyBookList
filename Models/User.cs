@@ -6,10 +6,10 @@ namespace MyBookList.Models
     public class User
     {
         [Key]
-        public int UserId { get; set; }
+        public int Id { get; set; }
 
         [Required]
-        public Guid UserUuid { get; set; } = Guid.NewGuid();
+        public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required]
         [MaxLength(100)]

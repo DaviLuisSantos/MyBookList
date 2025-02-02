@@ -20,6 +20,28 @@ namespace MyBookList.Services
         {
             return await _context.UserBooks.Where(ub => ub.UserId == userId).ToListAsync();
         }
+        public async Task<List<UserBook>> GetByUserUuid(Guid uuid)
+        {
+            UserService userService = new UserService(_context);
+            BookService bookService = new BookService(_context);
+            var user = await userService.GetUserByUuid(uuid);
+            var uBbooks = await _context.UserBooks.Where(ub => ub.UserId == user.Id).ToListAsync();
+            List<Book> books = new List<Book> { };
+            var tasks = uBbooks.Select(async uBook =>
+            {
+                var bookUn = await bookService.GetById(uBook.BookId);
+                if (bookUn != null)
+                {
+                    uBook.Book = bookUn;
+                    books.Add(bookUn);
+                }
+
+            });
+
+            await Task.WhenAll(tasks);
+
+            return uBbooks;
+        }
         public async Task<List<UserBook>> GetAll()
         {
             return await _context.UserBooks.ToListAsync();
@@ -27,7 +49,8 @@ namespace MyBookList.Services
         public async Task<UserBook> Create(UserBookCreateDto userBookDto)
         {
             DateTime startDate = DateTime.ParseExact(userBookDto.StartDate, "yyyy-MM-dd", null);
-            DateTime endDate = DateTime.ParseExact(userBookDto.FinishDate, "yyyy-MM-dd", null);
+            DateTime? endDate = userBookDto.FinishDate != null ? DateTime.ParseExact(userBookDto.FinishDate, "yyyy-MM-dd", null) : null;
+
             UserService userService = new UserService(_context);
             BookService bookService = new BookService(_context);
             UserBook userBook = new UserBook
@@ -37,10 +60,10 @@ namespace MyBookList.Services
                 DateFinished = endDate,
             };
 
-            var user = await userService.GetUserByUuid(userBookDto.UserUuid.Value);
-            var book = await bookService.GetById(userBook.BookId);
+            User? user = await userService.GetUserByUuid(userBookDto.UserUuid.Value);
+            Book? book = await bookService.GetById(userBookDto.BookId);
 
-            userBook.UserId = user.UserId;
+            userBook.UserId = user.Id;
             userBook.BookId = book.BookId;
 
             _context.UserBooks.Add(userBook);

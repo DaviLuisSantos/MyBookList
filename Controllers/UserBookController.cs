@@ -2,6 +2,7 @@
 using MyBookList.Services;
 using Carter;
 using MyBookList.DTOs.UserBook;
+using Microsoft.AspNetCore.Http;
 
 
 namespace MyBookList.Controllers;
@@ -10,23 +11,33 @@ public class UserBookController : CarterModule
 {
 public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/userBook/getAll", async (int id, IUserBookService service) =>
+        app.MapPost("/api/userBook/getAll", async (IUserBookService service, HttpContext httpContext) =>
         {
-            var book = await service.GetByUserId(id);
-            if (book == null)
-                return Results.NotFound();
-            return Results.Ok(book);
-
-        });
-        app.MapPost("/api/userBook/create", async (UserBookCreateDto userBook, IUserBookService service, HttpContext httpContext) =>
-        {
-            var token = httpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var token = httpContext.Request.Headers["key"].ToString();
 
             if (string.IsNullOrEmpty(token))
             {
                 return Results.Unauthorized();
             }
             Guid userUuid = Guid.Parse(token);
+
+            var uBook = await service.GetByUserUuid(userUuid);
+            if (uBook == null)
+                return Results.NotFound();
+            return Results.Ok(uBook);
+
+        });
+        app.MapPost("/api/userBook/create", async (UserBookCreateDto userBook, IUserBookService service, HttpContext httpContext) =>
+        {
+            var token = httpContext.Request.Headers["key"].ToString();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return Results.Unauthorized();
+            }
+            Guid userUuid = Guid.Parse(token);
+
+            userBook.UserUuid = userUuid; 
 
             var createdUserBook = await service.Create(userBook);
             return Results.Ok(createdUserBook);

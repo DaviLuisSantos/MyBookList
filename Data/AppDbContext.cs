@@ -35,6 +35,18 @@ namespace MyBookList.Data
                     .WithMany()
                     .HasForeignKey(ub => ub.BookId)
                      .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<User>()
+                .HasData(new User
+                {
+                    Id = 1,
+                    Username = "admin",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin"),
+                    Email="admin@gmail.com"
+                }
+                );
+
+
             }
         }
     }

@@ -61,22 +61,30 @@ namespace MyBookList.Services
             return true;
         }
 
-        public async Task<string> Login(LoginDto login)
+        public async Task<LoginReturn> Login(LoginDto login)
         {
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == login.Username);
             if (user == null)
-                return null;
+                return new LoginReturn();
             if(!VerifyPasswordHash(login.Password, user.PasswordHash))
-                return "0";
+                return new LoginReturn
+                {
+                    token="0"
+                };
 
-            return AuthService.GenerateToken(user);
+            string token = AuthService.GenerateToken(user);
+            return new LoginReturn
+            {
+                token = token,
+                Uuid = user.Uuid,
+            };
 
         }
 
         public async Task<User> GetUserByUuid(System.Guid uuid)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.UserUuid == uuid);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Uuid == uuid);
         }
 
         private bool VerifyPasswordHash(string password, string storedHash)

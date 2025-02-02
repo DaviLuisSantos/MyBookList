@@ -39,7 +39,7 @@ public class UserController : CarterModule
 
         app.MapPost("/api/user/update", async (int id, User user) =>
         {
-            if (id != user.UserId)
+            if (id != user.Id)
             {
                 return Results.BadRequest();
             }
@@ -60,17 +60,17 @@ public class UserController : CarterModule
         app.MapPost("/api/user/login", async (LoginDto loginRequest, IUserService service) =>
         {
 
-            string? token = await service.Login(loginRequest);
-            if (token == null)
+            LoginReturn? loginReturn = await service.Login(loginRequest);
+            if (loginReturn.token == null)
             {
                 return Results.NotFound();
             }
-            else if (token == "0")
+            else if (loginReturn.token == "0")
             {
                 return Results.Unauthorized();
             }
 
-            return Results.Ok(new { Token = token });
+            return Results.Ok(new { loginReturn });
 
         });
     }

@@ -11,6 +11,6 @@ namespace MyBookList.Services
         Task<User> Create(UserCreateDto userNv);
         Task<User> Update(User user);
         Task<bool> Delete(int userId);
-        Task<string> Login(LoginDto login);
+        Task<LoginReturn> Login(LoginDto login);
     }
 }

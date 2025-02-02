@@ -22,13 +22,16 @@ namespace MyBookList.Services
         }
         public async Task<Book> Create(BookCreateDto bookDto)
         {
+
             var book = new Book
             {
                 Title = bookDto.Title,
                 Author = bookDto.Author,
                 Description = bookDto.Description,
                 Pages = bookDto.Pages,
-                Genre = bookDto.Genre
+                Genre = bookDto.Genre,
+                Cover = bookDto.Cover,
+                Isbn =  bookDto.Isbn,
             };
 
             _context.Books.Add(book);

@@ -6,6 +6,7 @@ namespace MyBookList.Services
     public interface IUserService: ICrudService<User, UserCreateDto>
     {
         Task<User> GetById(int userId);
+        Task<User> GetUserByUuid(System.Guid uuid);
         Task<User> GetByUsername(string username);
         Task<List<User>> GetAll();
         Task<User> Create(UserCreateDto userNv);

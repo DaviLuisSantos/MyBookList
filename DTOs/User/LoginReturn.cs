@@ -2,7 +2,8 @@
 {
     public class LoginReturn
     {
-        public Guid Uuid { get; set; }
+        public int Id { get; set; }
         public string token { get; set; }
+        public string Username { get; set; }
     }
 }

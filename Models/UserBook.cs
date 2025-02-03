@@ -18,9 +18,9 @@ namespace MyBookList.Models
             [ForeignKey("BookId")]
             public Book Book { get; set; }
 
-            public DateTime? DateStarted { get; set; }
+            public DateOnly? DateStarted { get; set; }
 
-            public DateTime? DateFinished { get; set; }
+            public DateOnly? DateFinished { get; set; }
 
             public string? Status { get; set; }
         }

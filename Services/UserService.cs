@@ -77,7 +77,8 @@ namespace MyBookList.Services
             return new LoginReturn
             {
                 token = token,
-                Uuid = user.Uuid,
+                Id = user.Id,
+                Username = user.Username
             };
 
         }

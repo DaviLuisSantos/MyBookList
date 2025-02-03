@@ -12,6 +12,5 @@ namespace MyBookList.DTOs.UserBook
         public string? Status { get; set; }
         public string? StartDate { get; set; }
         public string? FinishDate { get; set; }
-        public Guid? UserUuid { get; set; }
     }
 }

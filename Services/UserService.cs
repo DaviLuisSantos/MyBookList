@@ -32,6 +32,8 @@ namespace MyBookList.Services
 
         public async Task<User> Create(UserCreateDto userNv)
         {
+            var userExist = GetByUsername(userNv.Username);
+            if (userExist != null) return new User();
             User user = new User
             {
                 Username = userNv.Username,

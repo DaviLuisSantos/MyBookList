@@ -22,12 +22,6 @@ public class UserController : CarterModule
 
         });
 
-        app.MapPost("/api/user/getAll", async (IUserService service) =>
-        {
-            List<User>? users = await service.GetAll();
-            return users == null ? Results.Ok() : Results.Ok(users);
-        });
-
         app.MapPost("/api/user/register", async (UserCreateDto userDto, IUserService service) =>
         {
             var createdUser = await service.Create(userDto);
@@ -35,26 +29,6 @@ public class UserController : CarterModule
                 return Results.BadRequest();
             else
                 return Results.Ok();
-        });
-
-        app.MapPost("/api/user/update", async (int id, User user) =>
-        {
-            if (id != user.Id)
-            {
-                return Results.BadRequest();
-            }
-            var updatedUser = await _userService.Update(user);
-            if (updatedUser == null)
-                return Results.NotFound();
-            return Results.Ok(updatedUser);
-        });
-
-        app.MapPost("/api/user/delete", async (int id) =>
-        {
-            var result = await _userService.Delete(id);
-            if (!result)
-                return Results.NotFound();
-            return Results.NoContent();
         });
 
         app.MapPost("/api/user/login", async (LoginDto loginRequest, IUserService service) =>

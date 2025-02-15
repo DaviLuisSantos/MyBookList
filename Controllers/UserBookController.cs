@@ -52,6 +52,7 @@ public override void AddRoutes(IEndpointRouteBuilder app)
             var updatedUserBook = await service.UpdateAsync(userBook);
             return Results.Ok(updatedUserBook);
         });
+
         app.MapDelete("/api/userBook/delete/{id:int}", async (IUserBookService service, int id) =>
         {
             var result = await service.Delete(id);

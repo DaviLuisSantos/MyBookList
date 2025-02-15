@@ -34,7 +34,7 @@ public class UserController : CarterModule
         app.MapPost("/api/user/login", async (LoginDto loginRequest, IUserService service) =>
         {
 
-            LoginReturn? loginReturn = await service.Login(loginRequest);
+            LoginReturn? loginReturn = await service.Login(loginRequest); 
             if (loginReturn.token == null)
             {
                 return Results.NotFound();

@@ -28,7 +28,7 @@ namespace MyBookList.Services
 
         }
         public async Task<List<UserBook>> GetByUserUuid(Guid uuid)
-        {
+        { 
             var user = await _userService.GetUserByUuid(uuid);
             var uBbooks = await _context.UserBooks.Where(ub => ub.UserId == user.Id).ToListAsync();
             List<Book> books = new List<Book> { };
@@ -54,7 +54,7 @@ namespace MyBookList.Services
         }
         public async Task<UserBook> Create(UserBookCreateDto userBookDto)
         {
-            DateOnly startDate = DateOnly.ParseExact(userBookDto.StartDate, "yyyy-MM-dd", null);
+            DateOnly? startDate = userBookDto.StartDate != null ? DateOnly.ParseExact(userBookDto.StartDate, "yyyy-MM-dd", null) : null;
             DateOnly? endDate = userBookDto.FinishDate != null ? DateOnly.ParseExact(userBookDto.FinishDate, "yyyy-MM-dd", null) : null;
 
             UserBook userBook = new UserBook

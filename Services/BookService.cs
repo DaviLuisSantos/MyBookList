@@ -22,7 +22,11 @@ namespace MyBookList.Services
         }
         public async Task<Book> Create(BookCreateDto bookDto)
         {
-
+            var bookExist = _context.Books.Where(x => x.Isbn == bookDto.Isbn).FirstOrDefault();
+            if(bookExist != null)
+            {
+                return bookExist;
+            }
             var book = new Book
             {
                 Title = bookDto.Title,

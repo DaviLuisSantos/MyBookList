@@ -39,10 +39,10 @@ namespace MyBookList.Data
             modelBuilder.Entity<User>()
                 .HasData(new User
                 {
-                    Id = 1,
+                    Id = Guid.NewGuid(),
                     Username = "admin",
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin"),
-                    Email="admin@gmail.com"
+                    Email="admin@gmail.com",
                 }
                 );
 

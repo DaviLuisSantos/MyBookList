@@ -7,8 +7,7 @@ namespace MyBookList.Services
     {
         Task<UserBook> GetById(int userBookId);
         Task<List<UserBook>> GetAll();
-        Task<List<UserBook>> GetByUserId(int userId);
-        Task<List<UserBook>> GetByUserUuid(Guid uuid);
+        Task<List<UserBook>> GetByUserId(Guid userId);
         Task<UserBook> Create(UserBookCreateDto userBook);
         Task<UserBook> UpdateAsync(UserBookUpdateDto userBook);
         Task<bool> Delete(int userBookId);

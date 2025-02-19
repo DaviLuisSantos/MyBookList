@@ -22,31 +22,10 @@ namespace MyBookList.Services
         {
             return await _context.UserBooks.FindAsync(userBookId);
         }
-        public async Task<List<UserBook>> GetByUserId(int userId)
+        public async Task<List<UserBook>> GetByUserId(Guid userId)
         {
             return await _context.UserBooks.Where(ub => ub.UserId == userId).Include(x => x.Book).ToListAsync();
 
-        }
-        public async Task<List<UserBook>> GetByUserUuid(Guid uuid)
-        { 
-            var user = await _userService.GetUserByUuid(uuid);
-            var uBbooks = await _context.UserBooks.Where(ub => ub.UserId == user.Id).ToListAsync();
-            List<Book> books = new List<Book> { };
-            var tasks = uBbooks.Select(async uBook =>
-            {
-
-                var bookUn = await _bookService.GetById(uBook.BookId);
-                if (bookUn != null)
-                {
-                    uBook.Book = bookUn;
-                    books.Add(bookUn);
-                }
-
-            });
-
-            await Task.WhenAll(tasks);
-
-            return uBbooks;
         }
         public async Task<List<UserBook>> GetAll()
         {

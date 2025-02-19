@@ -5,7 +5,7 @@ namespace MyBookList.DTOs.UserBook
     public class UserBookCreateDto
     {
         [Required]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         [Required]
         public int BookId { get; set; }
         [Required]

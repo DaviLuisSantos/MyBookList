@@ -23,7 +23,7 @@ public override void AddRoutes(IEndpointRouteBuilder app)
             {
                 return Results.Unauthorized();
             }
-            int userUuid = int.Parse(token);
+            Guid userUuid = Guid.Parse(token);
 
             var uBook = await service.GetByUserId(userUuid);
             if (uBook == null)
@@ -39,7 +39,7 @@ public override void AddRoutes(IEndpointRouteBuilder app)
             {
                 return Results.Unauthorized();
             }
-            int UserId = int.Parse(token);
+            Guid UserId = Guid.Parse(token);
 
             userBook.UserId = UserId; 
 

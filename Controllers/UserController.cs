@@ -13,7 +13,7 @@ public class UserController : CarterModule
 
     public override void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/user/getById", async (int id) =>
+        app.MapPost("/api/user/getById", async (Guid id) =>
         {
             var user = await _userService.GetById(id);
             if (user == null)
@@ -46,6 +46,20 @@ public class UserController : CarterModule
 
             return Results.Ok(new { loginReturn });
 
+        });
+        app.MapPost("/api/user/google-login", async (LoginDto loginRequest, IUserService service) =>
+        {
+            LoginReturn? loginReturn = await service.GoogleLogin(loginRequest);
+            if (loginReturn.token == null)
+            {
+                return Results.NotFound();
+            }
+            else if (loginReturn.token == "0")
+            {
+                return Results.Unauthorized();
+            }
+
+            return Results.Ok(new { loginReturn });
         });
     }
 

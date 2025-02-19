@@ -15,14 +15,9 @@ namespace MyBookList.Services
             _context = context;
         }
 
-        public async Task<User> GetById(int userId)
+        public async Task<User> GetById(Guid userId)
         {
             return await _context.Users.FindAsync(userId);
-        }
-
-        public async Task<User> GetByUsername(string username)
-        {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task<List<User>> GetAll()
@@ -32,13 +27,14 @@ namespace MyBookList.Services
 
         public async Task<User> Create(UserCreateDto userNv)
         {
-            var userExist = GetByUsername(userNv.Username);
-            if (userExist != null) return new User();
+            var userExist = _context.Users.FirstOrDefaultAsync(u => u.Email == userNv.Email);
+            if (userExist != null&& userExist.Result!=null) return new User();
             User user = new User
             {
+                Id=Guid.NewGuid(),
                 Username = userNv.Username,
                 Email = userNv.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(userNv.Password)
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(userNv.Password),
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -66,7 +62,7 @@ namespace MyBookList.Services
         public async Task<LoginReturn> Login(LoginDto login)
         {
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == login.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == login.Email);
             if (user == null)
                 return new LoginReturn();
             if(!VerifyPasswordHash(login.Password, user.PasswordHash))
@@ -85,9 +81,23 @@ namespace MyBookList.Services
 
         }
 
-        public async Task<User> GetUserByUuid(System.Guid uuid)
+        public async Task<LoginReturn> GoogleLogin(LoginDto login)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Uuid == uuid);
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == login.Email);
+            if (user == null)
+            {
+                var createUser = new UserCreateDto
+                {
+                    Username = login.Username,
+                    Password = login.Password,
+                    Email = login.Email
+                };
+                user = await Create(createUser);
+            }
+
+            return await Login(login);
+
         }
 
         private bool VerifyPasswordHash(string password, string storedHash)

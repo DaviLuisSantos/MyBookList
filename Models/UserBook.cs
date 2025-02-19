@@ -9,7 +9,7 @@ namespace MyBookList.Models
             [Key]
             public int UserBookId { get; set; }
 
-            public int UserId { get; set; }
+            public Guid UserId { get; set; }
 
             [ForeignKey("UserId")]
             public User User { get; set; }

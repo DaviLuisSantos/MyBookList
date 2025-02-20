@@ -52,21 +52,30 @@ namespace MyBookList.Services
         public async Task<UserBook> UpdateAsync(UserBookUpdateDto userBookDTO)
         {
             var userBook = await _context.UserBooks.FindAsync(userBookDTO.Id);
-            if (userBook == null)
+            if (userBook is null)
             {
-                // Lidar com o caso em que o UserBook não é encontrado
                 return null;
             }
-
+            
             DateOnly startDate;
-            if (!DateOnly.TryParseExact(userBookDTO.StartDate, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out startDate))
+            if (!string.IsNullOrEmpty(userBookDTO.StartDate))
             {
-                // Lidar com o caso em que a data de início não é válida
-                throw new ArgumentException("Data de início inválida");
-            }
 
-            userBook.Status = userBookDTO.Status;
-            userBook.DateStarted = startDate;
+                if (DateOnly.TryParseExact(userBookDTO.StartDate, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out startDate))
+                {
+                    userBook.DateStarted = startDate;
+                }
+                else
+                {
+                    throw new ArgumentException("Data de inicio inválida");
+                }
+            }
+            else
+            {
+                userBook.DateStarted = null;
+            }
+                userBook.Status = userBookDTO.Status;
+            
 
             if (!string.IsNullOrEmpty(userBookDTO.EndDate))
             {
@@ -77,7 +86,6 @@ namespace MyBookList.Services
                 }
                 else
                 {
-                    // Lidar com o caso em que a data de término não é válida
                     throw new ArgumentException("Data de término inválida");
                 }
             }

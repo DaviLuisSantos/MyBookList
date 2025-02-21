@@ -8,6 +8,7 @@ namespace MyBookList.Services
         Task<User> GetById(Guid userId);
         Task<List<User>> GetAll();
         Task<User> Create(UserCreateDto userNv);
+        Task<bool> Active(string emaul, Guid token);
         Task<User> Update(User user);
         Task<bool> Delete(int userId);
         Task<LoginReturn> Login(LoginDto login);

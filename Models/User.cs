@@ -18,6 +18,7 @@ namespace MyBookList.Models
 
         [Required]
         public string PasswordHash { get; set; }
+        public bool Activated { get; set; }
 
         //public int LibraryId { get; set; }
 

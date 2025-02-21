@@ -43,6 +43,7 @@ namespace MyBookList.Data
                     Username = "admin",
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin"),
                     Email="admin@gmail.com",
+                    Activated = true
                 }
                 );
 

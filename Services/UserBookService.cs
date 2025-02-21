@@ -2,6 +2,7 @@
 using MyBookList.Data;
 using Microsoft.EntityFrameworkCore;
 using MyBookList.DTOs.UserBook;
+using MyBookList.DTOs.Book;
 
 namespace MyBookList.Services
 {
@@ -36,10 +37,27 @@ namespace MyBookList.Services
             DateOnly? startDate = userBookDto.StartDate != null ? DateOnly.ParseExact(userBookDto.StartDate, "yyyy-MM-dd", null) : null;
             DateOnly? endDate = userBookDto.FinishDate != null ? DateOnly.ParseExact(userBookDto.FinishDate, "yyyy-MM-dd", null) : null;
 
+            var book = _context.Books.Where(x => x.Isbn == userBookDto.Isbn).FirstOrDefault();
+
+            if (book==null) {
+                var newBook = new BookCreateDto
+                {
+                    Title = userBookDto.Title,
+                    Author = userBookDto.Author,
+                    Description = userBookDto.Description,
+                    Pages = userBookDto.Pages,
+                    Genre = userBookDto.Genre,
+                    Cover = userBookDto.Cover,
+                    Isbn = userBookDto.Isbn,
+
+                };
+                book = await _bookService.Create(newBook);
+            }
+
             UserBook userBook = new UserBook
             {
                 UserId = userBookDto.UserId,
-                BookId = userBookDto.BookId,
+                BookId = book.BookId,
                 Status = userBookDto.Status,
                 DateStarted = startDate,
                 DateFinished = endDate,

@@ -9,10 +9,12 @@ namespace MyBookList.Services
     public class UserService : IUserService
     {
         private readonly AppDbContext _context;
+        private readonly IEmailSender _email;
 
-        public UserService(AppDbContext context)
+        public UserService(AppDbContext context, IEmailSender email)
         {
             _context = context;
+            _email = email;
         }
 
         public async Task<User> GetById(Guid userId)
@@ -31,14 +33,29 @@ namespace MyBookList.Services
             if (userExist != null&& userExist.Result!=null) return new User();
             User user = new User
             {
-                Id=Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 Username = userNv.Username,
                 Email = userNv.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(userNv.Password),
+                Activated = userNv.Active ?? false
             };
             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            string id = user.Id.ToString();
+            await _email.SendAccountActivationEmailAsync(userNv.Email, id, "http://localhost:3000");
+             await _context.SaveChangesAsync();
             return user;
+        }
+
+        public async Task<bool> Active(string email, Guid userActive)
+        {
+            var user = await GetById(userActive);
+            if (user!=null)
+            {
+                user.Activated = true;
+                await Update(user);
+                return true;
+            }
+            return false;
         }
 
         public async Task<User> Update(User user)
@@ -62,7 +79,7 @@ namespace MyBookList.Services
         public async Task<LoginReturn> Login(LoginDto login)
         {
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == login.Email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == login.Email && u.Activated==true);
             if (user == null)
                 return new LoginReturn();
             if(!VerifyPasswordHash(login.Password, user.PasswordHash))
@@ -91,7 +108,8 @@ namespace MyBookList.Services
                 {
                     Username = login.Username,
                     Password = login.Password,
-                    Email = login.Email
+                    Email = login.Email,
+                    Active = true
                 };
                 user = await Create(createUser);
             }

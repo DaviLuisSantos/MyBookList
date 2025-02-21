@@ -2,6 +2,7 @@
 using MyBookList.Services;
 using Carter;
 using MyBookList.DTOs.User;
+using Microsoft.AspNetCore.Builder;
 
 
 
@@ -26,6 +27,15 @@ public class UserController : CarterModule
         {
             var createdUser = await service.Create(userDto);
             if (createdUser==null)
+                return Results.BadRequest();
+            else
+                return Results.Ok();
+        });
+
+        app.MapPost("/api/user/activate-account",async (UserActivateDTO activate, IUserService service) =>
+        {
+            var createdUser = await service.Active(activate.Email, activate.Token);
+            if (createdUser == null)
                 return Results.BadRequest();
             else
                 return Results.Ok();

@@ -16,6 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data S
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IUserBookService, UserBookService>();
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 //builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.AddCarter();

@@ -35,7 +35,6 @@ builder.Services.AddCors(options =>
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.ListenAnyIP(80); // Escuta em todos os endereços IP na porta 5000
-    serverOptions.ListenAnyIP(443, listenOptions => listenOptions.UseHttps());
 });
 
 

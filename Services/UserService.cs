@@ -40,9 +40,9 @@ namespace MyBookList.Services
                 Activated = userNv.Active ?? false
             };
             _context.Users.Add(user);
+            await _context.SaveChangesAsync();
             string id = user.Id.ToString();
             await _email.SendAccountActivationEmailAsync(userNv.Email, id);
-             await _context.SaveChangesAsync();
             return user;
         }
 

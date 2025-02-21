@@ -10,7 +10,7 @@ namespace MyBookList.Services;
 
 public interface IEmailSender
 {
-    Task SendAccountActivationEmailAsync(string toEmail, string activationToken, string baseUrl);
+    Task SendAccountActivationEmailAsync(string toEmail, string activationToken);
     // Adicione o método já existente aqui
     Task SendEmailAsync(string toEmail, string subject, string message);
 }
@@ -26,7 +26,7 @@ public class EmailSender : IEmailSender
         _logger = logger;
     }
 
-    public async Task SendAccountActivationEmailAsync(string toEmail, string activationToken, string baseUrl)
+    public async Task SendAccountActivationEmailAsync(string toEmail, string activationToken)
     {
         // Obtém as configurações do SMTP (como no método SendEmailAsync)
         var smtpServer = _configuration["SmtpSettings:Server"];
@@ -42,7 +42,7 @@ public class EmailSender : IEmailSender
             throw new InvalidOperationException("Configurações SMTP incompletas. Verifique o appsettings.json.");
         }
 
-        string activationLink = $"{baseUrl}/register/activate?email={toEmail}&token={activationToken}";
+        string activationLink = $"https://mybooklist-frontend.vercel.app//register/activate?email={toEmail}&token={activationToken}";
 
         // Cria o corpo do e-mail
         string subject = "Ativação da sua conta";

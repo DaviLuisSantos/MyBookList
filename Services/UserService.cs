@@ -41,7 +41,7 @@ namespace MyBookList.Services
             };
             _context.Users.Add(user);
             string id = user.Id.ToString();
-            await _email.SendAccountActivationEmailAsync(userNv.Email, id, "http://localhost:3000");
+            await _email.SendAccountActivationEmailAsync(userNv.Email, id);
              await _context.SaveChangesAsync();
             return user;
         }

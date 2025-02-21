@@ -31,9 +31,10 @@ namespace MyBookList.Services
         {
             var userExist = _context.Users.FirstOrDefaultAsync(u => u.Email == userNv.Email);
             if (userExist != null&& userExist.Result!=null) return new User();
+            Guid id = Guid.NewGuid();
             User user = new User
             {
-                Id = Guid.NewGuid(),
+                Id = id,
                 Username = userNv.Username,
                 Email = userNv.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(userNv.Password),
@@ -41,8 +42,8 @@ namespace MyBookList.Services
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            string id = user.Id.ToString();
-            await _email.SendAccountActivationEmailAsync(userNv.Email, id);
+            string idString = id.ToString();
+            await _email.SendAccountActivationEmailAsync(userNv.Email, idString;
             return user;
         }
 

@@ -38,12 +38,12 @@ namespace MyBookList.Services
                 Username = userNv.Username,
                 Email = userNv.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(userNv.Password),
-                Activated = userNv.Active ?? false
+                Activated = true//userNv.Active ?? false
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             string idString = id.ToString();
-            await _email.SendAccountActivationEmailAsync(userNv.Email, idString);
+            //await _email.SendAccountActivationEmailAsync(userNv.Email, idString);
             return user;
         }
 

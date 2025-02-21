@@ -43,7 +43,7 @@ namespace MyBookList.Services
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             string idString = id.ToString();
-            await _email.SendAccountActivationEmailAsync(userNv.Email, idString;
+            await _email.SendAccountActivationEmailAsync(userNv.Email, idString);
             return user;
         }
 
